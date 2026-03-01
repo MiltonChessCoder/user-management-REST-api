@@ -15,8 +15,9 @@ function writeUsers(users) {
 // GET all users with optional pagination & filtering
 exports.getAllUsers = (req, res) => {
   const users = readUsers()
-  const { name, page = 1, limit = 5 } = req.query
+  const { name, page = 1, limit = 5, sortBy = "id", order = "asc" } = req.query
 
+  // Filter by name if provided
   let filteredUsers = users
   if (name && name.trim() !== "") {
     filteredUsers = users.filter(u =>
@@ -24,11 +25,24 @@ exports.getAllUsers = (req, res) => {
     )
   }
 
+  // Sorting
+  filteredUsers.sort((a, b) => {
+    let valA = a[sortBy]
+    let valB = b[sortBy]
+
+    if (typeof valA === "string") valA = valA.toLowerCase()
+    if (typeof valB === "string") valB = valB.toLowerCase()
+
+    if (valA < valB) return order === "asc" ? -1 : 1
+    if (valA > valB) return order === "asc" ? 1 : -1
+    return 0
+  })
+
+  // Pagination
   const pageInt = parseInt(page)
   const limitInt = parseInt(limit)
   const startIndex = (pageInt - 1) * limitInt
   const endIndex = startIndex + limitInt
-
   const paginatedUsers = filteredUsers.slice(startIndex, endIndex)
 
   res.json({
@@ -98,3 +112,4 @@ exports.deleteUser = (req, res) => {
   writeUsers(users)
   res.json({ message: "User deleted", user: deletedUser })
 }
+
