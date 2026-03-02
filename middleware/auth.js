@@ -11,9 +11,8 @@ module.exports = function(req, res, next) {
   const [username, password] = credentials.split(':')
 
   // Simple hardcoded check (for demo purposes)
-  if (username === 'admin' && password === 'password123') {
-    next()
+  if (username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD) {
+  next()
   } else {
-    res.status(401).json({ error: 'Unauthorized' })
-  }
-}
+  res.status(401).json({ error: 'Unauthorized' })
+  }}

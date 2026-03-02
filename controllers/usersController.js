@@ -11,7 +11,10 @@ function readUsers() {
 function writeUsers(users) {
   fs.writeFileSync(dataPath, JSON.stringify(users, null, 2))
 }
-
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
+}
 // GET all users with optional pagination & filtering
 exports.getAllUsers = (req, res) => {
   const users = readUsers()
@@ -69,9 +72,13 @@ exports.createUser = (req, res) => {
   const users = readUsers()
   const { name, email } = req.body
 
-  if (!name || !email) {
-    return res.status(400).json({ error: "Name and email are required" })
-  }
+    if (!name || name.trim().length < 3) {
+        return res.status(400).json({ error: "Name must be at least 3 characters" })
+    }
+
+    if (!email || !isValidEmail(email)) {
+        return res.status(400).json({ error: "Valid email is required" })
+    }
 
   const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1
 
@@ -91,7 +98,13 @@ exports.updateUser = (req, res) => {
   if (!user) return res.status(404).json({ error: "User not found" })
 
   const { name, email } = req.body
-  if (!name && !email) return res.status(400).json({ error: "Nothing to update" })
+    if (name && name.trim().length < 3) {
+        return res.status(400).json({ error: "Name must be at least 3 characters" })
+    }
+
+    if (email && !isValidEmail(email)) {
+        return res.status(400).json({ error: "Valid email is required" })
+    }
 
   if (name) user.name = name
   if (email) user.email = email

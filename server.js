@@ -1,8 +1,14 @@
+require('dotenv').config()
 const express = require('express');
 const app = express();
+const logger = require('./middleware/logger')
+app.use(logger)
+console.log("Logger loaded")
 const port = 3000;
 
 app.use(express.json());
+
+
 
 const usersRouter = require('./routes/users')
 
